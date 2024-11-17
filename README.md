@@ -1,1 +1,2 @@
-# Core repository list for Ximan package manager
+# Ximan package manager
+
