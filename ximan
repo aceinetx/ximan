@@ -1,0 +1,59 @@
+#!/usr/bin/python3
+
+import os;
+import sys;
+
+CORE_REPO = "https://github.com/xi816/ximan-core/";
+
+def system(a: str):
+  print(f"Executing {a}...\nEnter to continue");
+  input();
+  os.system(a);
+
+def coreSearch(core: str):
+  return 0;
+
+def ximanReadCore(src: str):
+  return {
+    "gc16x": ["0.07", "https://github.com/xi816/gc16x"],
+    "hed": ["0.1", "https://github.com/xi816/hed"]
+  };
+
+def ximanUpdate():
+  yn = input("Proceed with installation? [Y/n]: ")[0];
+  if (yn == 1):
+    return 1;
+  if (yn in ["", "Y", "y"]):
+    system("rm -rf ~/.config/ximan/");
+    system(f"git clone {CORE_REPO} ~/.config/ximan/");
+  else:
+    return 1;
+  return 0;
+
+def ximanInstall(prog: list):
+  yn = input("Proceed with installation? [Y/n]: ")[0];
+  if (yn == 1):
+    return 1;
+  if (yn in ["", "Y", "y"]):
+    for pr in prog:
+      system("echo "+pr);
+  else:
+    return 1;
+
+  return 0;
+
+def ximanMain(argc: int, argv: list):
+  if (argc == 1):
+    print("ximan: no arguments given");
+    return 1;
+  if (argv[1] == "update"):
+    ximanUpdate();
+  elif (argv[1] == "install"):
+    print("Installing packages:");
+    print("  \033[32m"+(" ".join(argv[2:])), end="\033[0m\n");
+    ximanInstall(argv[2:]);
+
+  return 0;
+
+sys.exit(ximanMain(len(sys.argv), sys.argv));
+
