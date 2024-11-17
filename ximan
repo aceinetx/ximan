@@ -2,41 +2,59 @@
 
 import os;
 import sys;
+import subprocess;
+from os import system;
 
+USERNAME = subprocess.check_output(["whoami"]).decode()[:-1];
 CORE_REPO = "https://github.com/xi816/ximan-core/";
+CORE_FILE = f"/home/{USERNAME}/.config/ximan/core.ximan";
 
-def system(a: str):
-  print(f"Executing {a}...\nEnter to continue");
-  input();
-  os.system(a);
+# def system(a: str):
+#   print(f"Executing {a}...\nEnter to continue");
+#   input();
+#   os.system(a);
 
 def coreSearch(core: str):
   return 0;
 
-def ximanReadCore(src: str):
-  return {
-    "gc16x": ["0.07", "https://github.com/xi816/gc16x"],
-    "hed": ["0.1", "https://github.com/xi816/hed"]
-  };
+def ximanReadCore():
+  with open(CORE_FILE, "r") as fcore:
+    score = fcore.read();
+  core = dict();
+  for i in score.split("\n"):
+    if (i):
+      core[i.split()[0]] = [i.split()[1], i.split()[2]];
+
+  return core;
 
 def ximanUpdate():
   yn = input("Proceed with installation? [Y/n]: ")[0];
   if (yn == 1):
     return 1;
   if (yn in ["", "Y", "y"]):
-    system("rm -rf ~/.config/ximan/");
-    system(f"git clone {CORE_REPO} ~/.config/ximan/");
+    system(f"rm -rf /home/{USERNAME}/.config/ximan/");
+    system(f"git clone {CORE_REPO} /home/{USERNAME}/.config/ximan/");
+    system(f"rm -rf /home/{USERNAME}/.config/ximan/.git/");
   else:
     return 1;
   return 0;
 
-def ximanInstall(prog: list):
+def ximanInstall(prog: list, upgrade = False):
   yn = input("Proceed with installation? [Y/n]: ")[0];
+  core = ximanReadCore();
   if (yn == 1):
     return 1;
   if (yn in ["", "Y", "y"]):
     for pr in prog:
-      system("echo "+pr);
+      if (pr in core):
+        print(f"  Installing {pr}...");
+        system(f"sudo mkdir -p /usr/share/ximan/");
+        if (upgrade):
+          system(f"sudo rm -rf /usr/share/ximan/{pr}/");
+        system(f"sudo git clone {core[pr][0]} /usr/share/ximan/{pr}/");
+      else:
+        print(f"Package {pr} not found");
+        return 1;
   else:
     return 1;
 
@@ -49,9 +67,19 @@ def ximanMain(argc: int, argv: list):
   if (argv[1] == "update"):
     ximanUpdate();
   elif (argv[1] == "install"):
+    if (len(argv) < 3):
+      print("ximan: no packages given");
+      return 1;
     print("Installing packages:");
     print("  \033[32m"+(" ".join(argv[2:])), end="\033[0m\n");
     ximanInstall(argv[2:]);
+  elif (argv[1] == "upgrade"):
+    if (len(argv) < 3):
+      print("ximan: no packages given");
+      return 1;
+    print("Installing packages:");
+    print("  \033[32m"+(" ".join(argv[2:])), end="\033[0m\n");
+    ximanInstall(argv[2:], True);
 
   return 0;
 
