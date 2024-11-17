@@ -28,10 +28,11 @@ def ximanReadCore():
   return core;
 
 def ximanUpdate():
-  yn = input("Proceed with installation? [Y/n]: ")[0];
+  yn = input("Proceed with update? [Y/n]: ");
+  if (not yn): yn = "y";
   if (yn == 1):
     return 1;
-  if (yn in ["", "Y", "y"]):
+  if (yn[0] in ["", "Y", "y"]):
     system(f"rm -rf /home/{USERNAME}/.config/ximan/");
     system(f"git clone {CORE_REPO} /home/{USERNAME}/.config/ximan/");
     system(f"rm -rf /home/{USERNAME}/.config/ximan/.git/");
@@ -40,11 +41,10 @@ def ximanUpdate():
   return 0;
 
 def ximanInstall(prog: list, upgrade = False):
-  yn = input("Proceed with installation? [Y/n]: ")[0];
+  yn = input("Proceed with installation? [Y/n]: ");
+  if (not yn): yn = "y";
   core = ximanReadCore();
-  if (yn == 1):
-    return 1;
-  if (yn in ["", "Y", "y"]):
+  if (yn[0] in ["", "Y", "y"]):
     for pr in prog:
       if (pr in core):
         print(f"  Installing {pr}...");
