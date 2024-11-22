@@ -3,11 +3,18 @@
 import os;
 import sys;
 import subprocess;
-from os import system;
+from os import system, getenv;
 
-USERNAME = subprocess.check_output(["whoami"]).decode()[:-1];
+HOME = getenv("HOME");
+USERNAME = getenv("USERNAME")
+if USERNAME == None: USERNAME = getenv("USER")
+if USERNAME == None: USERNAME = getenv("LOGNAME")
+PREFIX = getenv("PREFIX")
 CORE_REPO = "https://github.com/xi816/ximan-core/";
-CORE_FILE = f"/home/{USERNAME}/.config/ximan/core.ximan";
+CORE_FILE = f"{HOME}/.config/ximan/core.ximan";
+XIMAN_SUDO = "sudo"
+if getenv("XIMAN_USE_SUDO") == "0":
+    XIMAN_SUDO = ""
 
 def coreSearch(core: str):
   return 0;
@@ -28,9 +35,9 @@ def ximanUpdate():
   if (yn == 1):
     return 1;
   if (yn[0] in ["", "Y", "y"]):
-    system(f"rm -rf /home/{USERNAME}/.config/ximan/");
-    system(f"git clone {CORE_REPO} /home/{USERNAME}/.config/ximan/");
-    system(f"rm -rf /home/{USERNAME}/.config/ximan/.git/");
+    system(f"rm -rf {HOME}/.config/ximan/");
+    system(f"git clone {CORE_REPO} {HOME}/.config/ximan/");
+    system(f"rm -rf {HOME}/.config/ximan/.git/");
   else:
     return 1;
   return 0;
@@ -49,16 +56,16 @@ def ximanInstall(prog: list, upgrade = False):
         print(f"  Installing {pr}...");
         if (toHome):
           if (upgrade):
-            system(f"sudo rm -rf /home/{USERNAME}/{pr}/");
-          system(f"sudo mkdir -p /home/{USERNAME}/{pr}/");
-          system(f"sudo git clone {core[pr][0]} /home/{USERNAME}/{pr}/");
-          system(f"sudo chown {USERNAME} -R /home/{USERNAME}/{pr}/");
+            system(f"{XIMAN_SUDO} rm -rf {HOME}/{pr}/");
+          system(f"{XIMAN_SUDO} mkdir -p {HOME}/{pr}/");
+          system(f"{XIMAN_SUDO} git clone {core[pr][0]} {HOME}/{pr}/");
+          system(f"{XIMAN_SUDO} chown {USERNAME} -R {HOME}/{pr}/");
         else:
-          system(f"sudo mkdir -p /usr/share/ximan/");
+          system(f"{XIMAN_SUDO} mkdir -p {PREFIX}/share/ximan/");
           if (upgrade):
-            system(f"sudo rm -rf /usr/share/ximan/{pr}/");
-          system(f"sudo git clone {core[pr][0]} /usr/share/ximan/{pr}/");
-          system(f"sudo chown {USERNAME} -R /usr/share/ximan/{pr}/");
+            system(f"{XIMAN_SUDO} rm -rf {PREFIX}/share/ximan/{pr}/");
+          system(f"{XIMAN_SUDO} git clone {core[pr][0]} {PREFIX}/share/ximan/{pr}/");
+          system(f"{XIMAN_SUDO} chown {USERNAME} -R {PREFIX}/share/ximan/{pr}/");
       else:
         print(f"Package {pr} not found");
         return 1;
